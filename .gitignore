@@ -1,0 +1,36 @@
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+*.egg
+*.whl
+
+# ===== 虚拟环境 =====
+backend/venv/
+venv/
+.env
+
+# ===== Node.js =====
+frontend/node_modules/
+
+# ===== 构建产物 =====
+frontend/dist/
+
+# ===== 数据文件（用户数据、大文件、敏感文件）=====
+backend/data/ecdict.db
+backend/data/app.db
+backend/data/documents/
+backend/data/logs/
+backend/data/.fernet_key
+
+# ===== IDE =====
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ===== 操作系统 =====
+.DS_Store
+Thumbs.db

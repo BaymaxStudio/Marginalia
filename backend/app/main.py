@@ -1,0 +1,75 @@
+"""FastAPI 入口"""
+
+import os
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+
+from app.database import init_db
+from app.logger import setup_logging, get_logger
+from app.services.settings_service import get_all_safe
+from app.routers import (
+    documents,
+    lookup,
+    commentary,
+    vocabulary,
+    progress,
+    settings,
+)
+
+app = FastAPI(title="AI Academic Reader", version="1.0.0")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://localhost:8000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# API 路由（必须在 SPA fallback 之前注册）
+app.include_router(documents.router, prefix="/api")
+app.include_router(lookup.router, prefix="/api")
+app.include_router(commentary.router, prefix="/api")
+app.include_router(vocabulary.router, prefix="/api")
+app.include_router(progress.router, prefix="/api")
+app.include_router(settings.router, prefix="/api")
+
+_app_logger = get_logger("main")
+
+# 前端静态文件路径
+_FRONTEND_DIST = os.path.join(os.path.dirname(__file__), "..", "..", "frontend", "dist")
+_FRONTEND_DIST = os.path.abspath(_FRONTEND_DIST)
+
+if os.path.exists(_FRONTEND_DIST):
+    app.mount("/assets", StaticFiles(
+        directory=os.path.join(_FRONTEND_DIST, "assets")), name="assets")
+
+    @app.get("/")
+    async def serve_root():
+        return FileResponse(os.path.join(_FRONTEND_DIST, "index.html"))
+
+    @app.get("/{path:path}")
+    async def serve_spa(path: str):
+        file_path = os.path.join(_FRONTEND_DIST, path)
+        if os.path.isfile(file_path):
+            return FileResponse(file_path)
+        return FileResponse(os.path.join(_FRONTEND_DIST, "index.html"))
+
+
+@app.on_event("startup")
+def on_startup():
+    init_db()
+    try:
+        log_level = get_all_safe().get("log_level", "INFO")
+    except Exception:
+        log_level = "INFO"
+    setup_logging(log_level)
+    _app_logger.info("Marginalia backend started (log level: %s)", log_level)
+
+
+@app.get("/api/health")
+def health():
+    return {"status": "ok"}

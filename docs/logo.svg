@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <style>
+      .page { fill: #fdfbf7; stroke: #8b5e3c; stroke-width: 2.5; stroke-linejoin: round; }
+      .page-left { fill: #fdfbf7; stroke: #8b5e3c; stroke-width: 2.5; }
+      .spine { fill: none; stroke: #8b5e3c; stroke-width: 3; }
+      .text-line { fill: none; stroke: #c8b898; stroke-width: 2; stroke-linecap: round; }
+      .annotation { fill: none; stroke: #8b5e3c; stroke-width: 2.8; stroke-linecap: round; stroke-linejoin: round; }
+      .annotation-accent { fill: none; stroke: #c47a3a; stroke-width: 2.2; stroke-linecap: round; }
+      .bullet { fill: #8b5e3c; }
+    </style>
+  </defs>
+
+  <!-- Left page -->
+  <path class="page-left" d="M256,80 L256,432 L80,432 Q58,432 58,410 L58,102 Q58,80 80,80 Z" />
+  <!-- Right page -->
+  <path class="page" d="M256,80 L432,80 Q454,80 454,102 L454,410 Q454,432 432,432 L256,432 Z" />
+  <!-- Spine -->
+  <line class="spine" x1="256" y1="80" x2="256" y2="432" />
+
+  <!-- Left page text lines -->
+  <line class="text-line" x1="100" y1="140" x2="220" y2="140" />
+  <line class="text-line" x1="100" y1="170" x2="210" y2="170" />
+  <line class="text-line" x1="100" y1="200" x2="215" y2="200" />
+  <line class="text-line" x1="100" y1="230" x2="200" y2="230" />
+  <line class="text-line" x1="100" y1="260" x2="218" y2="260" />
+  <line class="text-line" x1="100" y1="290" x2="208" y2="290" />
+  <line class="text-line" x1="100" y1="320" x2="215" y2="320" />
+  <line class="text-line" x1="100" y1="350" x2="195" y2="350" />
+
+  <!-- Right page text lines -->
+  <line class="text-line" x1="292" y1="140" x2="412" y2="140" />
+  <line class="text-line" x1="292" y1="170" x2="405" y2="170" />
+  <line class="text-line" x1="292" y1="200" x2="410" y2="200" />
+  <line class="text-line" x1="292" y1="230" x2="395" y2="230" />
+  <line class="text-line" x1="292" y1="260" x2="408" y2="260" />
+  <line class="text-line" x1="292" y1="290" x2="402" y2="290" />
+  <line class="text-line" x1="292" y1="320" x2="410" y2="320" />
+  <line class="text-line" x1="292" y1="350" x2="390" y2="350" />
+
+  <!-- Marginalia annotations - left margin -->
+  <!-- Underline + note mark on left page -->
+  <line class="annotation" x1="84" y1="172" x2="96" y2="172" />
+  <line class="annotation" x1="90" y1="172" x2="90" y2="196" />
+  <circle class="bullet" cx="90" cy="178" r="3" />
+
+  <!-- Highlight mark on left page -->
+  <line class="annotation-accent" x1="86" y1="255" x2="94" y2="255" />
+  <line class="annotation-accent" x1="90" y1="252" x2="90" y2="258" />
+
+  <!-- Star/asterisk annotation on left page -->
+  <line class="annotation" x1="90" y1="310" x2="90" y2="328" />
+  <line class="annotation" x1="82" y1="315" x2="98" y2="321" />
+  <line class="annotation" x1="82" y1="321" x2="98" y2="315" />
+
+  <!-- Marginalia annotations - left margin of right page -->
+  <line class="annotation" x1="268" y1="200" x2="280" y2="200" />
+  <line class="annotation" x1="274" y1="200" x2="274" y2="220" />
+
+  <!-- Double line margin note on right page -->
+  <line class="annotation-accent" x1="270" y1="285" x2="280" y2="285" />
+  <line class="annotation-accent" x1="270" y1="292" x2="280" y2="292" />
+
+  <!-- Curly brace annotation on right page -->
+  <path class="annotation" d="M270,340 Q264,340 264,348 Q264,356 270,356" />
+  <path class="annotation" d="M270,340 Q264,340 264,332 Q264,324 270,324" />
+
+  <!-- Page fold shadow (subtle) -->
+  <linearGradient id="shadow" x1="0" y1="0" x2="0.06" y2="0">
+    <stop offset="0%" stop-color="#8b5e3c" stop-opacity="0.08" />
+    <stop offset="100%" stop-color="#8b5e3c" stop-opacity="0" />
+  </linearGradient>
+  <rect x="250" y="80" width="12" height="352" fill="url(#shadow)" />
+</svg>

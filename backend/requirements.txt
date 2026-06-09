@@ -1,0 +1,23 @@
+# FastAPI + 服务器
+fastapi>=0.115.0
+uvicorn[standard]>=0.34.0
+python-multipart>=0.0.19
+
+# 数据验证（FastAPI 自带 pydantic 依赖，此处仅为显式声明）
+pydantic>=2.10.0
+
+# PDF 解析
+PyMuPDF>=1.27.0
+pymupdf4llm>=1.27.0
+
+# AI SDK
+anthropic>=0.42.0
+openai>=1.58.0
+
+# 词形还原（ECDICT 查询前还原变形词）
+nltk>=3.9.0
+
+# 加密（API Key 存储）
+cryptography>=44.0.0
+
+# 数据库（Python 内置 sqlite3 足够，无需额外依赖）

@@ -1,0 +1,17 @@
+.review-card {
+  margin-top: 28px; padding: 32px; background: var(--color-comment-bg);
+  border-radius: var(--radius); border: 1px solid var(--color-border);
+  text-align: left; animation: rev-fadein 0.3s ease-out;
+}
+@keyframes rev-fadein { from { opacity: 0; } to { opacity: 1; } }
+
+.rev-loading { font-size: 0.9em; color: var(--color-text-light); font-style: italic; text-align: center; padding: 20px; }
+.rev-avatar { font-size: 2em; text-align: center; margin-bottom: 8px; }
+.rev-title { text-align: center; font-weight: 500; color: var(--color-accent); margin-bottom: 24px; font-size: 1.05em; }
+
+.rev-section { margin-bottom: 20px; }
+.rev-section h4 { font-weight: 600; font-size: 0.88em; color: var(--color-accent); margin-bottom: 6px; }
+.rev-section p { font-size: 0.92em; line-height: 1.8; color: var(--color-text); }
+.rev-section ul { padding-left: 18px; }
+.rev-section li { font-size: 0.92em; line-height: 1.7; color: var(--color-text); margin-bottom: 4px; }
+.rev-summary-note { text-align: center; margin-top: 16px; font-size: 0.8em; color: var(--color-text-light); opacity: 0.6; font-style: italic; }
