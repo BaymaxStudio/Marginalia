@@ -82,7 +82,7 @@
 ### 安装
 
 ```bash
-git clone https://github.com/{用户名}/marginalia.git
+git clone https://github.com/BaymaxStudio/marginalia.git
 cd marginalia
 python3 setup.py
 ```
