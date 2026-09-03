@@ -101,19 +101,10 @@ python3 run.py
 
 ## Architecture / 技术架构
 
-```
-前端 React 19 ──HTTP──▶ 后端 FastAPI (Python)
-                              │
-                    ┌─────────┼─────────┐
-                    ▼         ▼         ▼
-               PDF 解析   ECDICT 词典  AI 适配器
-              pymupdf4llm  340万词条   Claude / DeepSeek
-                                      / OpenAI 兼容
-                    │         │         │
-                    └─────────┼─────────┘
-                              ▼
-                     SQLite 本地数据库
-```
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/diagrams/marginalia.dark.png">
+  <img src="docs/diagrams/marginalia.light.png" alt="Marginalia 本地优先阅读工具运行架构">
+</picture>
 
 - **词义查询**：ECDICT 权威词典（毫秒级）+ AI 语境解释（异步），双层架构确保准确性
 - **评论生成**：六个角色的人设和触发规则定义在 Prompt 模板中，AI 根据段落内容自动选择 2-3 位发言
