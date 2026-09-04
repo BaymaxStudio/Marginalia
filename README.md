@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/logo-128.png" width="120" alt="Marginalia" />
+  <img src="docs/social-preview.png" alt="Marginalia：一段英文学术文本旁，六位 AI 读者留下六种批注" />
 </p>
 
 <h1 align="center">Marginalia</h1>
@@ -9,24 +9,19 @@
 </p>
 
 <p align="center">
-  <a href="#quick-start-快速开始">快速开始</a> ·
-  <a href="#features-功能">功能</a> ·
-  <a href="#architecture-架构">架构</a> ·
-  <a href="#contributing-参与贡献">贡献</a> ·
-  <a href="#license-许可证">许可证</a>
+  <strong>六个会说话的批注者：</strong>
+  领读学长 · 术语侦探 · 批判者 · 联想家 · 文化翻译官 · 历史档案员
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT" />
-  <img src="https://img.shields.io/badge/python-≥3.10-blue.svg" alt="Python" />
-  <img src="https://img.shields.io/badge/react-19-blue.svg" alt="React" />
+  <img src="https://img.shields.io/badge/license-MIT-1B2A4A.svg" alt="License: MIT" />
+  <img src="https://img.shields.io/badge/python-%E2%89%A53.10-C8A24B.svg" alt="Python" />
+  <img src="https://img.shields.io/badge/react-19-3A5A8C.svg" alt="React" />
 </p>
 
 ---
 
 **Marginalia** is an AI-powered academic reading tool for Chinese-speaking scholars. Upload an English PDF, click any word for dictionary definitions with AI-powered contextual explanations, and summon a panel of six reader personas who annotate paragraphs from different analytical angles — like having a study group that already read the book.
-
----
 
 ## Features / 功能
 
