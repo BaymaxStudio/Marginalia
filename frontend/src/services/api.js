@@ -2,8 +2,8 @@ const BASE_URL = '/api'
 
 async function request(url, options = {}) {
   const res = await fetch(`${BASE_URL}${url}`, {
-    headers: { 'Content-Type': 'application/json', ...options.headers },
     ...options,
+    headers: { ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }), ...options.headers },
   })
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: res.statusText }))
@@ -17,7 +17,7 @@ async function request(url, options = {}) {
 export const uploadDocument = (file) => {
   const form = new FormData()
   form.append('file', file)
-  return fetch(`${BASE_URL}/documents/upload`, { method: 'POST', body: form }).then(r => r.json())
+  return request('/documents/upload', { method: 'POST', body: form })
 }
 
 export const listDocuments = () => request('/documents')
@@ -32,9 +32,10 @@ export const deleteDocument = (docId) =>
 
 // ---- 词义查询 ----
 
-export const dictionaryLookup = (word) => request(`/dictionary/${word}`)
+export const dictionaryLookup = (word, options = {}) => request(`/dictionary/${encodeURIComponent(word)}`, options)
 
-export const aiLookup = (body) => request('/lookup/ai', {
+export const aiLookup = (body, options = {}) => request('/lookup/ai', {
+  ...options,
   method: 'POST',
   body: JSON.stringify(body),
 })

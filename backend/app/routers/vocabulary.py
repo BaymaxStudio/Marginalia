@@ -52,7 +52,7 @@ async def list_vocabulary(
             "sentence": r.get("sentence", ""),
             "selected_meaning": entries[r["selected_index"]].get("zh", "")
                 if entries and r.get("selected_index") is not None
-                and r["selected_index"] < len(entries) else None,
+                and 0 <= r["selected_index"] < len(entries) else None,
             "ai_explanation": r.get("ai_explanation"),
             "domain": r.get("domain"),
             "lookup_count": r.get("lookup_count", 1),

@@ -71,17 +71,20 @@ async def ai_lookup(body: LookupRequest):
 
     # 2. 查缓存
     lemma = lemmatize(body.word)
-    cache_key = (body.document_id, body.paragraph_id, lemma)
+    # 同一段落可能多次使用同一个词；语境和展开模式必须分别缓存。
+    cache_key = (body.document_id, body.paragraph_id, lemma, body.sentence, body.mode)
     cached = get_cached("word_lookup", *cache_key)
     if cached:
         t_cache = time.time()
         data = json.loads(cached)
+        ai_context = AIContext(**data["ai_context"])
+        _add_to_vocabulary(body, lemma, phonetic, dict_entries, ai_context)
         logger.info("word_lookup word=%s cache=hit latency=%.3fs",
                     lemma, time.time() - t_cache)
         return LookupResponse(
             word_lemma=lemma, phonetic=phonetic,
             dictionary_entries=[DictionaryEntry(**d) for d in dict_entries],
-            ai_context=AIContext(**data["ai_context"]),
+            ai_context=ai_context,
             ai_expand=AIExpand(**data["ai_expand"]) if data.get("ai_expand") else None,
             from_cache=True,
         )

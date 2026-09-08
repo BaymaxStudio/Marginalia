@@ -36,6 +36,22 @@ DATA_DIR = Path(__file__).parent.parent.parent / "data"
 DOCUMENTS_DIR = DATA_DIR / "documents"
 
 
+def _persona_comment(comment: dict) -> PersonaComment:
+    """补全旧缓存和适配器输出中未包含的头像标识。"""
+    return PersonaComment(
+        persona=comment["persona"],
+        avatar=comment.get("avatar") or {
+            "领读学长": "guide",
+            "术语侦探": "detective",
+            "批判者": "critic",
+            "联想家": "connector",
+            "文化翻译官": "translator",
+            "历史档案员": "archivist",
+        }.get(comment["persona"], "default"),
+        comment=comment["comment"],
+    )
+
+
 def _load_structure(doc_id: str) -> dict:
     conn = get_connection()
     row = conn.execute("SELECT json_path FROM documents WHERE id = ?", (doc_id,)).fetchone()
@@ -98,7 +114,7 @@ async def paragraph_commentary(body: CommentaryRequest):
                     body.paragraph_id, time.time() - t_cache)
         return CommentaryResponse(
             selected_personas=data["selected_personas"],
-            comments=[PersonaComment(**c) for c in data["comments"]],
+            comments=[_persona_comment(c) for c in data["comments"]],
             from_cache=True,
         )
 
@@ -119,29 +135,16 @@ async def paragraph_commentary(body: CommentaryRequest):
     ai_resp = await adapter.paragraph_commentary(ai_req)
 
     # 写缓存
+    comments = [_persona_comment(c.model_dump()) for c in ai_resp.comments]
     cache_data = {
         "selected_personas": ai_resp.selected_personas,
-        "comments": [c.model_dump() for c in ai_resp.comments],
+        "comments": [c.model_dump() for c in comments],
     }
     set_cache("paragraph_commentary", json.dumps(cache_data, ensure_ascii=False), *cache_key)
 
     return CommentaryResponse(
         selected_personas=ai_resp.selected_personas,
-        comments=[
-            PersonaComment(
-                persona=c.persona,
-                avatar={
-                    "领读学长": "guide",
-                    "术语侦探": "detective",
-                    "批判者": "critic",
-                    "联想家": "connector",
-                    "文化翻译官": "translator",
-                    "历史档案员": "archivist",
-                }.get(c.persona, "default"),
-                comment=c.comment,
-            )
-            for c in ai_resp.comments
-        ],
+        comments=comments,
         from_cache=False,
     )
 

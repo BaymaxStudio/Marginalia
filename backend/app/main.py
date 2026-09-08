@@ -1,8 +1,9 @@
 """FastAPI 入口"""
 
 import os
+from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -43,6 +44,11 @@ _app_logger = get_logger("main")
 _FRONTEND_DIST = os.path.join(os.path.dirname(__file__), "..", "..", "frontend", "dist")
 _FRONTEND_DIST = os.path.abspath(_FRONTEND_DIST)
 
+@app.get("/api/health")
+def health():
+    return {"status": "ok"}
+
+
 if os.path.exists(_FRONTEND_DIST):
     app.mount("/assets", StaticFiles(
         directory=os.path.join(_FRONTEND_DIST, "assets")), name="assets")
@@ -53,9 +59,14 @@ if os.path.exists(_FRONTEND_DIST):
 
     @app.get("/{path:path}")
     async def serve_spa(path: str):
-        file_path = os.path.join(_FRONTEND_DIST, path)
-        if os.path.isfile(file_path):
-            return FileResponse(file_path)
+        if path == "api" or path.startswith("api/"):
+            raise HTTPException(404, "接口不存在")
+        root = Path(_FRONTEND_DIST).resolve()
+        file_path = (root / path).resolve()
+        if not file_path.is_relative_to(root):
+            raise HTTPException(404, "文件不存在")
+        if file_path.is_file():
+            return FileResponse(str(file_path))
         return FileResponse(os.path.join(_FRONTEND_DIST, "index.html"))
 
 
@@ -68,8 +79,3 @@ def on_startup():
         log_level = "INFO"
     setup_logging(log_level)
     _app_logger.info("Marginalia backend started (log level: %s)", log_level)
-
-
-@app.get("/api/health")
-def health():
-    return {"status": "ok"}

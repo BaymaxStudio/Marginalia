@@ -9,53 +9,77 @@ export default function WordCard({ word, sentence, docId, paragraphId, x, y, onC
   const [error, setError] = useState('')
   const cardRef = useRef(null)
 
-  useEffect(() => {
-    const clean = word.replace(/[^a-zA-Z'’-]/g, '')
-    if (!clean) { onClose(); return }
-    dictionaryLookup(clean)
-      .then((d) => { if (d.found) setDictData(d); else setError('词典未收录该词') })
-      .catch(() => setError('词典查询失败'))
-  }, [word])
+  const onCloseRef = useRef(onClose)
+  useEffect(() => { onCloseRef.current = onClose }, [onClose])
 
   useEffect(() => {
+    const controller = new AbortController()
+    let active = true
     const clean = word.replace(/[^a-zA-Z'’-]/g, '')
-    if (!clean || !dictData) return
-    setLoading(true)
+    setDictData(null)
+    setAiData(null)
     setError('')
-    aiLookup({ document_id: docId, paragraph_id: paragraphId, word: clean, sentence, mode: 'context' })
-      .then((d) => {
-        if (d.ai_context) setAiData(d.ai_context)
+    setLoading(false)
+    if (!clean) { onCloseRef.current(); return }
+
+    async function lookup() {
+      let dictionary
+      try {
+        dictionary = await dictionaryLookup(clean, { signal: controller.signal })
+      } catch (err) {
+        if (active && err.name !== 'AbortError') setError('词典查询失败')
+        return
+      }
+      if (!active) return
+      if (!dictionary.found) {
+        setError('词典未收录该词')
+        return
+      }
+      setDictData(dictionary)
+      setLoading(true)
+      try {
+        const result = await aiLookup({ document_id: docId, paragraph_id: paragraphId, word: clean, sentence, mode: 'context' }, { signal: controller.signal })
+        if (!active) return
+        if (result.ai_context) setAiData(result.ai_context)
         else setError('AI 解释暂时不可用')
-      })
-      .catch(() => setError('AI 请求失败'))
-      .finally(() => setLoading(false))
-  }, [dictData])
+      } catch (err) {
+        if (active && err.name !== 'AbortError') setError('AI 请求失败')
+      } finally {
+        if (active) setLoading(false)
+      }
+    }
+    lookup()
+    return () => {
+      active = false
+      controller.abort()
+    }
+  }, [word, sentence, docId, paragraphId])
 
   useEffect(() => {
     if (!cardRef.current) return
     const rect = cardRef.current.getBoundingClientRect()
-    let top = y, left = x - 180
-    if (rect.right > window.innerWidth - 20) left = window.innerWidth - rect.width - 20
-    if (left < 20) left = 20
-    if (rect.bottom > window.innerHeight - 20) top = y - rect.height - 20
+    const left = Math.max(20, Math.min(x - 180, window.innerWidth - rect.width - 20))
+    const top = Math.max(20, y + rect.height > window.innerHeight - 20 ? y - rect.height - 20 : y)
     cardRef.current.style.top = top + 'px'
     cardRef.current.style.left = left + 'px'
-  }, [dictData, aiData])
+  }, [dictData, aiData, error, loading, x, y])
 
   useEffect(() => {
     const handler = (e) => {
-      if (cardRef.current && !cardRef.current.contains(e.target)) onClose()
+      if (cardRef.current && !cardRef.current.contains(e.target)) onCloseRef.current()
     }
-    setTimeout(() => document.addEventListener('click', handler), 100)
-    return () => document.removeEventListener('click', handler)
+    const timer = setTimeout(() => document.addEventListener('click', handler), 100)
+    return () => {
+      clearTimeout(timer)
+      document.removeEventListener('click', handler)
+    }
   }, [])
-
-  if (!dictData && !error) return null
 
   return (
     <div ref={cardRef} className="word-card" style={{ top: y, left: x - 180 }}>
       <button className="wc-close" onClick={onClose}>×</button>
 
+      {!dictData && !error && <div className="wc-dict wc-loading">词典查询中...</div>}
       {error && !dictData && <div className="wc-error">{error}</div>}
 
       {dictData && (

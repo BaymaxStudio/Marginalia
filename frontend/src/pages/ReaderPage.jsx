@@ -22,145 +22,140 @@ export default function ReaderPage() {
   const [showChapterReview, setShowChapterReview] = useState(false)
   const [chapterStatus, setChapterStatus] = useState({})
 
-  // Progress tracking
   const progressRef = useRef({})
-  const saveTimerRef = useRef(null)
-  const restoredRef = useRef(false)
+  const restoreParagraphRef = useRef(null)
+  const chapterRequestRef = useRef(0)
 
-  // Load structure + restore progress
-  useEffect(() => {
-    if (!docId) return
-    setError('')
-    getStructure(docId)
-      .then(async (s) => {
-        setStructure(s)
-        const allChapters = s.chapters || []
-        setChapters(allChapters)
-
-        if (allChapters.length === 0) {
-          setLoading(false)
-          return
-        }
-
-        // Restore chapter status from backend
-        try {
-          const prog = await getProgress(docId)
-          const savedStatus = prog.chapter_status || {}
-          // 合并：已存储的章节状态 + 未读的新章节默认为 unread
-          for (const ch of allChapters) {
-            if (!savedStatus[ch.id]) savedStatus[ch.id] = 'unread'
-          }
-          progressRef.current = savedStatus
-        } catch (_) {
-          for (const ch of allChapters) progressRef.current[ch.id] = 'unread'
-        }
-        setChapterStatus({...progressRef.current})
-
-        setActiveChapterId(targetChapterId)
-        await loadChapterContent(targetChapterId, allChapters)
-      })
-      .catch((e) => {
-        setError('加载文档失败: ' + e.message)
-        setLoading(false)
-      })
-  }, [docId])
-
-  const loadChapterContent = async (chId, chs = chapters) => {
+  // 章节响应可能乱序返回，只接受最近一次导航的结果。
+  const loadChapterContent = async (chId) => {
+    const requestId = ++chapterRequestRef.current
     setLoading(true)
+    setChapterData(null)
     setError('')
     try {
       const data = await getChapter(docId, chId)
-      setChapterData(data)
+      if (requestId === chapterRequestRef.current) setChapterData(data)
     } catch (e) {
-      setError('加载章节失败: ' + e.message)
+      if (requestId === chapterRequestRef.current) setError('加载章节失败: ' + e.message)
+    } finally {
+      if (requestId === chapterRequestRef.current) setLoading(false)
     }
-    setLoading(false)
   }
 
-  // Restore scroll position after chapter renders
   useEffect(() => {
-    if (!chapterData || restoredRef.current) return
-    restoredRef.current = true
+    let cancelled = false
+    setLoading(true)
+    setError('')
+    setStructure(null)
+    setChapters([])
+    setChapterData(null)
+    setActiveChapterId(null)
+    setWordCard(null)
+    setActiveComment(null)
+    setShowChapterReview(false)
+    progressRef.current = {}
+    restoreParagraphRef.current = null
+    setChapterStatus({})
 
-    getProgress(docId).then((prog) => {
-      if (prog.last_paragraph_id) {
-        // Small delay for DOM to render
-        setTimeout(() => {
-          const el = document.getElementById(prog.last_paragraph_id)
-          if (el) el.scrollIntoView({ block: 'center' })
-        }, 300)
+    async function initialize() {
+      try {
+        const s = await getStructure(docId)
+        if (cancelled) return
+        setStructure(s)
+        const allChapters = s.chapters || []
+        setChapters(allChapters)
+        if (!allChapters.length) {
+          setLoading(false)
+          return
+        }
+        const prog = await getProgress(docId).catch(() => ({}))
+        if (cancelled) return
+        // 只保留章节状态，兼容旧版本混入 last_paragraph_id 的记录。
+        const statuses = Object.fromEntries(allChapters.map(ch => [
+          ch.id, ['unread', 'in_progress', 'completed'].includes(prog.chapter_status?.[ch.id])
+            ? prog.chapter_status[ch.id] : 'unread',
+        ]))
+        progressRef.current = statuses
+        setChapterStatus(statuses)
+        const savedParagraph = prog.last_paragraph_id || ''
+        const chapterNumber = /^para_(\d+)_/.exec(savedParagraph)?.[1]
+        const targetChapterId = allChapters.find(ch => ch.id === `ch_${chapterNumber}`)?.id
+          || allChapters[0].id
+        restoreParagraphRef.current = savedParagraph
+        setActiveChapterId(targetChapterId)
+        await loadChapterContent(targetChapterId)
+      } catch (e) {
+        if (!cancelled) {
+          setError('加载文档失败: ' + e.message)
+          setLoading(false)
+        }
       }
-    }).catch(() => {})
-  }, [chapterData?.chapter_id])
+    }
+    initialize()
+    return () => {
+      cancelled = true
+      chapterRequestRef.current += 1
+    }
+  }, [docId])
 
-  // IntersectionObserver for auto-save
   useEffect(() => {
     if (!chapterData) return
+    const paragraphId = restoreParagraphRef.current
+    restoreParagraphRef.current = null
+    if (paragraphId) document.getElementById(paragraphId)?.scrollIntoView({ block: 'center' })
+  }, [chapterData])
 
-    // 计算当前章最后一段的 ID
-    let lastParaId = null
-    for (const sec of (chapterData.sections || [])) {
-      const paras = sec.paragraphs || []
-      if (paras.length > 0) lastParaId = paras[paras.length - 1].id
+  useEffect(() => {
+    if (!chapterData || chapterData.chapter_id !== activeChapterId) return
+    const paragraphs = (chapterData.sections || []).flatMap(sec => sec.paragraphs || [])
+    const lastParaId = paragraphs.at(-1)?.id
+    let saveTimer = null
+    let pendingProgress = null
+    const save = () => {
+      if (!pendingProgress) return
+      const snapshot = pendingProgress
+      pendingProgress = null
+      updateProgress(docId, snapshot).catch(() => {})
     }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            const pid = entry.target.id
-            if (pid && pid.startsWith('para_')) {
-              progressRef.current.last_paragraph_id = pid
-
-              // 判断是否为当前章最后一段 → completed，否则 in_progress
-              const newStatus = (pid === lastParaId) ? 'completed' : 'in_progress'
-
-              if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
-              saveTimerRef.current = setTimeout(() => {
-                const updatedStatus = { ...progressRef.current }
-                updatedStatus[activeChapterId] = newStatus
-                progressRef.current = updatedStatus
-                setChapterStatus({...updatedStatus})
-
-                updateProgress(docId, {
-                  last_paragraph_id: pid,
-                  chapter_status: updatedStatus,
-                }).catch(() => {})
-              }, 2000)
-            }
-          }
-        }
-      },
-      { threshold: 0.5 }
-    )
-
-    const paraElements = document.querySelectorAll('[id^="para_"]')
-    paraElements.forEach((el) => observer.observe(el))
-
+    const observer = new IntersectionObserver(entries => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue
+        const pid = entry.target.id
+        // 已读章节回看前文时仍保持已读；离开页面前保存待写入的进度。
+        const status = pid === lastParaId || progressRef.current[activeChapterId] === 'completed'
+          ? 'completed' : 'in_progress'
+        const updatedStatus = { ...progressRef.current, [activeChapterId]: status }
+        progressRef.current = updatedStatus
+        setChapterStatus(updatedStatus)
+        pendingProgress = { last_paragraph_id: pid, chapter_status: updatedStatus }
+        clearTimeout(saveTimer)
+        saveTimer = setTimeout(save, 2000)
+      }
+    }, { threshold: 0.5 })
+    for (const para of paragraphs) {
+      const el = document.getElementById(para.id)
+      if (el) observer.observe(el)
+    }
     return () => {
       observer.disconnect()
-      if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
+      clearTimeout(saveTimer)
+      save()
     }
-  }, [chapterData?.chapter_id, activeChapterId, docId])
+  }, [chapterData, activeChapterId, docId])
 
   const switchChapter = (chId) => {
-    if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
-    // 仅保存当前阅读位置，不改变任何章节的完成状态（导航行为 ≠ 阅读行为）
-    updateProgress(docId, {
-      last_paragraph_id: progressRef.current.last_paragraph_id || '',
-      chapter_status: progressRef.current,
-    }).catch(() => {})
-
+    if (chId === activeChapterId && chapterData) return
+    restoreParagraphRef.current = null
     setActiveChapterId(chId)
     setActiveComment(null)
     setWordCard(null)
     setShowChapterReview(false)
-    restoredRef.current = false
     loadChapterContent(chId)
     window.scrollTo(0, 0)
   }
 
   const handleWordClick = useCallback((word, sentence, e, paragraphId) => {
+    e.stopPropagation()
     const rect = e.target.getBoundingClientRect()
     setWordCard({
       word, sentence,
@@ -176,15 +171,6 @@ export default function ReaderPage() {
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
   }, [])
-
-  const renderParagraph = (text, paragraphId) => {
-    if (!text) return null
-    const tokens = text.match(/\b[\w'’-]+(?:-\n[\w'’-]+)?\b|[^\w\s]+|\s+/g) || [text]
-    return (
-      <span id={paragraphId} className="para-anchor" />
-    )
-    // Note: this is placeholder - real rendering is below
-  }
 
   return (
     <div className="reader-layout">
@@ -291,6 +277,7 @@ export default function ReaderPage() {
 
       {wordCard && (
         <WordCard
+          key={`${wordCard.docId}:${wordCard.paragraphId}:${wordCard.word}`}
           word={wordCard.word} sentence={wordCard.sentence}
           docId={wordCard.docId} paragraphId={wordCard.paragraphId}
           x={wordCard.x} y={wordCard.y}
