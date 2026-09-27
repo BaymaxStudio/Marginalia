@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getSettings, updateSettings } from '../services/api'
+import { applyReadingPrefs } from '../services/readingPrefs'
 import './SettingsPage.css'
 
 const PROVIDERS = [
@@ -9,14 +10,16 @@ const PROVIDERS = [
   { value: 'openai_compat', label: 'OpenAI 兼容', desc: '自定义 base_url + model_name' },
 ]
 
+// 服务端不回传 Key 原文；空值提交时后端保持原值不变
+const EMPTY_KEYS = { api_key_claude: '', api_key_deepseek: '', api_key_openai_compat: '' }
+
 export default function SettingsPage() {
   const navigate = useNavigate()
   const [saved, setSaved] = useState(false)
+  const [configuredKeys, setConfiguredKeys] = useState({})
   const [form, setForm] = useState({
     ai_provider: 'claude',
-    api_key_claude: '',
-    api_key_deepseek: '',
-    api_key_openai_compat: '',
+    ...EMPTY_KEYS,
     openai_compat_base_url: '',
     openai_compat_model_name: '',
     font_size: 18,
@@ -26,22 +29,34 @@ export default function SettingsPage() {
   })
 
   useEffect(() => {
-    getSettings().then((s) => setForm((f) => ({ ...f, ...s }))).catch(() => {})
+    getSettings().then(({ api_keys_configured, has_api_key, ...s }) => {
+      setConfiguredKeys(api_keys_configured || {})
+      setForm((f) => ({ ...f, ...s }))
+    }).catch(() => {})
   }, [])
 
   const handleChange = (k, v) => setForm((f) => ({ ...f, [k]: v }))
   const handleSave = async () => {
     try {
       await updateSettings(form)
-      document.documentElement.style.setProperty('--font-size', form.font_size + 'px')
-      document.documentElement.style.setProperty('--line-height', String(form.line_height))
-      setSaved(true)
-      setTimeout(() => setSaved(false), 2000)
-    } catch (e) { alert('保存失败: ' + e.message) }
+    } catch (e) {
+      alert('保存失败: ' + e.message)
+      return
+    }
+    applyReadingPrefs(form)
+    setForm((f) => ({ ...f, ...EMPTY_KEYS }))
+    getSettings()
+      .then((s) => setConfiguredKeys(s.api_keys_configured || {}))
+      .catch((e) => console.warn('刷新 API Key 状态失败', e))
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
   }
 
   const apiKeyField = form.ai_provider === 'claude' ? 'api_key_claude'
     : form.ai_provider === 'deepseek' ? 'api_key_deepseek' : 'api_key_openai_compat'
+  const apiKeyPlaceholder = configuredKeys[form.ai_provider] ? '已保存 API Key，留空则保持不变'
+    : form.ai_provider === 'openai_compat' ? '输入 API Key...'
+    : `输入 ${PROVIDERS.find(p => p.value === form.ai_provider)?.label} 的 API Key...`
 
   return (
     <div className="settings-page">
@@ -72,7 +87,7 @@ export default function SettingsPage() {
         <section>
           <h2>API Key</h2>
           <input type="password" className="input-field"
-            placeholder={form.ai_provider === 'openai_compat' ? '输入 API Key...' : `输入 ${PROVIDERS.find(p => p.value === form.ai_provider)?.label} 的 API Key...`}
+            placeholder={apiKeyPlaceholder}
             value={form[apiKeyField] || ''}
             onChange={(e) => handleChange(apiKeyField, e.target.value)} />
           {form.ai_provider === 'openai_compat' && (

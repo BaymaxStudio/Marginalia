@@ -168,6 +168,9 @@ class ProgressResponse(BaseModel):
 class SettingsResponse(BaseModel):
     ai_provider: str
     has_api_key: bool
+    api_keys_configured: dict[str, bool] = {}
+    openai_compat_base_url: str = ""
+    openai_compat_model_name: str = ""
     font_size: int
     line_height: float
     theme: str

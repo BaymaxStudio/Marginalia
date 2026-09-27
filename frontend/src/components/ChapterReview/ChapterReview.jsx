@@ -5,16 +5,26 @@ import './ChapterReview.css'
 export default function ChapterReview({ docId, chapterId }) {
   const [review, setReview] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
-  useEffect(() => {
+  const load = () => {
     setLoading(true)
+    setError('')
     chapterReview({ document_id: docId, chapter_id: chapterId })
       .then((d) => setReview(d))
-      .catch(() => {})
+      .catch((e) => setError('章节回顾生成失败：' + e.message))
       .finally(() => setLoading(false))
-  }, [docId, chapterId])
+  }
+
+  useEffect(load, [docId, chapterId])
 
   if (loading) return <div className="review-card"><p className="rev-loading">领读学长正在回顾章节...</p></div>
+  if (error) return (
+    <div className="review-card">
+      <p className="rev-error">{error}</p>
+      <button className="btn-swap" onClick={load}>重试</button>
+    </div>
+  )
   if (!review) return null
 
   return (

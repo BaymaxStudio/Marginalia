@@ -16,9 +16,11 @@ export default function CommentPanel({ docId, paragraphId, onClose }) {
   const [personas, setPersonas] = useState([])
   const [loading, setLoading] = useState(true)
   const [excluded, setExcluded] = useState([])
+  const [error, setError] = useState('')
 
   const fetchComments = async (excludeList = []) => {
     setLoading(true)
+    setError('')
     try {
       const data = await paragraphCommentary({
         document_id: docId,
@@ -27,8 +29,11 @@ export default function CommentPanel({ docId, paragraphId, onClose }) {
       })
       setPersonas(data.selected_personas || [])
       setComments(data.comments || [])
-    } catch (e) { console.error(e) }
-    setLoading(false)
+    } catch (e) {
+      setError('评论生成失败：' + e.message)
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => { fetchComments([]) }, [docId, paragraphId])
@@ -48,7 +53,15 @@ export default function CommentPanel({ docId, paragraphId, onClose }) {
 
       {loading && <p className="cp-loading">正在生成评论...</p>}
 
-      {!loading && comments.map((c, i) => (
+      {!loading && error && (
+        <>
+          <p className="cp-error">{error}</p>
+          {/* 换一批失败时 excluded 已更新，重试的仍是换批请求 */}
+          <button className="btn-swap" onClick={() => fetchComments(excluded)}>重试</button>
+        </>
+      )}
+
+      {!loading && !error && comments.map((c, i) => (
         <div key={i} className="comment-item">
           <div className="comment-avatar">{AVATARS[c.persona] || '💬'}</div>
           <div className="comment-body">
@@ -58,7 +71,7 @@ export default function CommentPanel({ docId, paragraphId, onClose }) {
         </div>
       ))}
 
-      {!loading && comments.length > 0 && (
+      {!loading && !error && comments.length > 0 && (
         <button className="btn-swap" onClick={handleSwap}>
           🔄 换一批视角
         </button>

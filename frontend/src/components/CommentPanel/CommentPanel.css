@@ -22,3 +22,4 @@
   cursor: pointer; transition: all 0.15s; display: block; margin: 8px auto 0;
 }
 .btn-swap:hover { background: var(--color-accent); color: #fff; border-color: var(--color-accent); }
+.cp-error { font-size: 0.88em; color: #c04040; line-height: 1.6; padding: 4px 0 8px; }

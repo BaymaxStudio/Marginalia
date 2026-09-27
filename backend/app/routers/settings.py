@@ -25,10 +25,17 @@ async def get_settings():
 
         provider = all_settings.get("ai_provider", "claude")
         has_api_key = bool(all_settings.get(f"api_key_{provider}", ""))
+        api_keys_configured = {
+            p: bool(all_settings.get(f"api_key_{p}", ""))
+            for p in ("claude", "deepseek", "openai_compat")
+        }
 
         return {
             "ai_provider": provider,
             "has_api_key": has_api_key,
+            "api_keys_configured": api_keys_configured,
+            "openai_compat_base_url": all_settings.get("openai_compat_base_url", ""),
+            "openai_compat_model_name": all_settings.get("openai_compat_model_name", ""),
             "font_size": prefs["font_size"],
             "line_height": prefs["line_height"],
             "theme": prefs["theme"],
@@ -45,6 +52,9 @@ async def update_settings(body: SettingsUpdateRequest):
         raise HTTPException(400, "没有需要更新的字段")
 
     for key, value in updates.items():
+        # GET 不回传 Key 原文，表单里的空 Key 表示“保持不变”，不能覆盖已存的值
+        if key.startswith("api_key_") and not str(value).strip():
+            continue
         update_setting(key, str(value) if not isinstance(value, str) else value)
 
     # 如果更新了 log_level，动态调整日志级别

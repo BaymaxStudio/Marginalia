@@ -3,13 +3,14 @@
 import os
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 
 from app.database import init_db
 from app.logger import setup_logging, get_logger
+from app.services.ai_adapter import NoAPIKeyError
 from app.services.settings_service import get_all_safe
 from app.routers import (
     documents,
@@ -39,6 +40,12 @@ app.include_router(progress.router, prefix="/api")
 app.include_router(settings.router, prefix="/api")
 
 _app_logger = get_logger("main")
+
+
+@app.exception_handler(NoAPIKeyError)
+async def no_api_key_handler(request: Request, exc: NoAPIKeyError) -> JSONResponse:
+    # 未配置 Key 是用户可处理的状态，把原因带给前端，而不是笼统的 500
+    return JSONResponse(status_code=400, content={"detail": str(exc)})
 
 # 前端静态文件路径
 _FRONTEND_DIST = os.path.join(os.path.dirname(__file__), "..", "..", "frontend", "dist")
