@@ -1,0 +1,13 @@
+.rp { display: flex; flex-direction: column; gap: 14px; }
+.rp-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.rp-label { font-size: 14px; color: var(--ink-2); }
+.rp-stepper { display: flex; align-items: center; gap: 4px; border: 1px solid var(--line); border-radius: 10px; padding: 2px; }
+.rp-stepper .icon-btn { width: 32px; height: 32px; }
+.rp-stepper .icon-btn[disabled] { opacity: .35; cursor: default; background: none; }
+.rp-value { min-width: 48px; text-align: center; font-size: 14px; font-variant-numeric: tabular-nums; }
+.rp-preview {
+  padding: 14px 16px; border-radius: var(--radius); background: var(--paper);
+  border: 1px solid var(--line);
+  font-family: var(--font-text); font-size: var(--font-size); line-height: var(--line-height);
+}
+.rp-hint { font-size: 12.5px; color: var(--faint); }

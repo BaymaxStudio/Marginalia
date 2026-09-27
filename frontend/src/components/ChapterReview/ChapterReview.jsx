@@ -1,7 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { chapterReview } from '../../services/api'
+import Icon from '../Icon/Icon'
+import ErrorMessage from '../Notes/ErrorMessage'
 import './ChapterReview.css'
 
+// 章末回顾：领读学长梳理本章论证主线、收获和前后衔接。
 export default function ChapterReview({ docId, chapterId }) {
   const [review, setReview] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -18,45 +21,48 @@ export default function ChapterReview({ docId, chapterId }) {
 
   useEffect(load, [docId, chapterId])
 
-  if (loading) return <div className="review-card"><p className="rev-loading">领读学长正在回顾章节...</p></div>
-  if (error) return (
-    <div className="review-card">
-      <p className="rev-error">{error}</p>
-      <button className="btn-swap" onClick={load}>重试</button>
-    </div>
-  )
-  if (!review) return null
-
   return (
-    <div className="review-card">
-      <div className="rev-avatar">📚</div>
-      <h3 className="rev-title">章节回顾 · 领读学长</h3>
+    <section className="review" aria-label="章节回顾">
+      <div className="review-kicker"><Icon name="sparkle" size={15} />章节回顾 · 领读学长</div>
 
-      <section className="rev-section">
-        <h4>论证主线</h4>
-        <p>{review.main_argument}</p>
-      </section>
+      {loading && <div className="skeleton review-skeleton"><span /><span /><span /></div>}
 
-      <section className="rev-section">
-        <h4>关键收获</h4>
-        <ul>
-          {review.key_takeaways?.map((t, i) => <li key={i}>{t}</li>)}
-        </ul>
-      </section>
-
-      <section className="rev-section">
-        <h4>章节衔接</h4>
-        <p>{review.connection_to_previous}</p>
-      </section>
-
-      <section className="rev-section">
-        <h4>前瞻提示</h4>
-        <p>{review.preview_next}</p>
-      </section>
-
-      {review.summarized && (
-        <p className="rev-summary-note">本章较长，回顾基于章节摘要生成</p>
+      {!loading && error && (
+        <div className="review-error">
+          <ErrorMessage message={error} />
+          <button type="button" className="btn btn-sm" onClick={load}>
+            <Icon name="refresh" size={15} />重试
+          </button>
+        </div>
       )}
-    </div>
+
+      {!loading && !error && review && (
+        <div className="review-body">
+          <div className="review-block review-lead">
+            <h4>论证主线</h4>
+            <p>{review.main_argument}</p>
+          </div>
+          {review.key_takeaways?.length > 0 && (
+            <div className="review-block">
+              <h4>关键收获</h4>
+              <ol>{review.key_takeaways.map((t, i) => <li key={i}>{t}</li>)}</ol>
+            </div>
+          )}
+          {review.connection_to_previous && (
+            <div className="review-block">
+              <h4>与前文的衔接</h4>
+              <p>{review.connection_to_previous}</p>
+            </div>
+          )}
+          {review.preview_next && (
+            <div className="review-block">
+              <h4>下一章预告</h4>
+              <p>{review.preview_next}</p>
+            </div>
+          )}
+          {review.summarized && <p className="review-note">本章较长，回顾基于章节摘要生成。</p>}
+        </div>
+      )}
+    </section>
   )
 }

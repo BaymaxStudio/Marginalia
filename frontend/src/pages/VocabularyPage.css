@@ -1,15 +1,44 @@
-.vocab-page { max-width: 720px; margin: 0 auto; padding: 48px 24px; }
-.vocab-header { display: flex; align-items: center; gap: 20px; margin-bottom: 32px; }
-.vocab-header h1 { font-weight: 300; font-size: 1.8em; color: var(--color-accent); }
-.vocab-controls { display: flex; gap: 12px; margin-bottom: 28px; }
-.vocab-controls select { padding: 8px 14px; border: 2px solid var(--color-border); border-radius: var(--radius); background: var(--color-card); font-family: inherit; font-size: 0.9em; color: var(--color-text); }
-.empty { color: var(--color-text-light); font-style: italic; padding: 32px 0; }
+.vocab { min-height: 100vh; }
+.vocab-controls { display: flex; gap: 10px; margin-bottom: 24px; }
+.vocab-controls .select { width: auto; min-width: 140px; }
+.vocab-search { position: relative; flex: 1; display: flex; align-items: center; }
+.vocab-search .icon { position: absolute; left: 12px; color: var(--faint); pointer-events: none; }
+.vocab-search .input { padding-left: 36px; }
 
-.vocab-card { padding: 20px 24px; border: 1px solid var(--color-border); border-radius: var(--radius); margin-bottom: 10px; background: var(--color-card); }
-.vocab-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 8px; }
-.vocab-head h3 { font-weight: 600; font-size: 1.1em; }
-.phonetic { color: var(--color-text-light); font-size: 0.85em; }
-.count { margin-left: auto; font-size: 0.8em; color: var(--color-text-light); }
-.vocab-sentence { color: var(--color-text-light); font-style: italic; margin-bottom: 6px; font-size: 0.9em; }
-.vocab-explain { font-size: 0.9em; line-height: 1.6; margin-bottom: 8px; }
-.vocab-domain { display: inline-block; background: #f0e8d8; color: var(--color-accent); padding: 2px 10px; border-radius: 12px; font-size: 0.8em; }
+.vocab-empty {
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  padding: 56px 24px; text-align: center;
+  border: 1.5px dashed var(--line-2); border-radius: var(--radius-lg); color: var(--muted);
+}
+.vocab-empty strong { font: 600 19px/1.3 var(--font-text); color: var(--ink); }
+.vocab-empty p { max-width: 26em; font-size: 14px; }
+.vocab-empty .btn { margin-top: 6px; }
+.vocab-none { color: var(--muted); font-size: 14px; padding: 24px 0; }
+
+.entries { list-style: none; border-top: 1px solid var(--line); }
+.entry {
+  display: grid; grid-template-columns: 11rem minmax(0, 1fr); gap: 24px;
+  padding: 22px 0; border-bottom: 1px solid var(--line);
+}
+.entry-word { display: flex; flex-direction: column; gap: 2px; }
+.entry-lemma { font: 600 21px/1.25 var(--font-text); color: var(--ink); overflow-wrap: anywhere; }
+.entry-phonetic { font-size: 13px; color: var(--faint); }
+.entry-body { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.entry-meaning { font-size: 15px; font-weight: 500; color: var(--ink); }
+.entry-quote {
+  margin: 0; padding-left: 12px; border-left: 2px solid var(--line-2);
+  font: italic 15px/1.65 var(--font-text); color: var(--ink-2);
+}
+.entry-quote mark { background: var(--mark); color: inherit; border-radius: 2px; padding: 0 1px; font-style: normal; }
+.entry-explain { font-size: 14px; line-height: 1.7; color: var(--ink-2); }
+.entry-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; font-size: 12.5px; color: var(--muted); }
+.entry-jump { display: inline-flex; align-items: center; gap: 3px; color: var(--accent-ink); }
+.entry-jump:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+@media (max-width: 640px) {
+  .vocab-controls { flex-wrap: wrap; }
+  .vocab-search { flex-basis: 100%; }
+  .vocab-controls .select { flex: 1; }
+  .entry { grid-template-columns: 1fr; gap: 8px; }
+  .entry-word { flex-direction: row; align-items: baseline; gap: 10px; }
+}

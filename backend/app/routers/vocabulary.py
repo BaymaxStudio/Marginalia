@@ -47,6 +47,8 @@ async def list_vocabulary(
         entries = json.loads(r.get("dictionary_entries", "[]"))
         words.append({
             "id": r["id"],
+            "document_id": r.get("document_id"),
+            "paragraph_id": r.get("paragraph_id"),
             "word_lemma": r["word_lemma"],
             "phonetic": r.get("phonetic"),
             "sentence": r.get("sentence", ""),

@@ -47,6 +47,7 @@ class LookupResponse(BaseModel):
     dictionary_entries: list[DictionaryEntry] = []
     ai_context: Optional[AIContext] = None
     ai_expand: Optional[AIExpand] = None
+    ai_error: Optional[str] = None
     from_cache: bool = False
 
 

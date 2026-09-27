@@ -1,18 +1,19 @@
-.review-card {
-  margin-top: 28px; padding: 32px; background: var(--color-comment-bg);
-  border-radius: var(--radius); border: 1px solid var(--color-border);
-  text-align: left; animation: rev-fadein 0.3s ease-out;
+.review {
+  margin-top: 20px; padding: 24px 26px 26px;
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  animation: note-in .2s ease-out;
 }
-@keyframes rev-fadein { from { opacity: 0; } to { opacity: 1; } }
-
-.rev-loading { font-size: 0.9em; color: var(--color-text-light); font-style: italic; text-align: center; padding: 20px; }
-.rev-avatar { font-size: 2em; text-align: center; margin-bottom: 8px; }
-.rev-title { text-align: center; font-weight: 500; color: var(--color-accent); margin-bottom: 24px; font-size: 1.05em; }
-
-.rev-section { margin-bottom: 20px; }
-.rev-section h4 { font-weight: 600; font-size: 0.88em; color: var(--color-accent); margin-bottom: 6px; }
-.rev-section p { font-size: 0.92em; line-height: 1.8; color: var(--color-text); }
-.rev-section ul { padding-left: 18px; }
-.rev-section li { font-size: 0.92em; line-height: 1.7; color: var(--color-text); margin-bottom: 4px; }
-.rev-summary-note { text-align: center; margin-top: 16px; font-size: 0.8em; color: var(--color-text-light); opacity: 0.6; font-style: italic; }
-.rev-error { font-size: 0.9em; color: #c04040; line-height: 1.6; text-align: center; }
+.review-kicker {
+  display: flex; align-items: center; gap: 6px; margin-bottom: 16px;
+  font-size: 12.5px; font-weight: 500; letter-spacing: .04em; color: var(--accent-ink);
+}
+.review-body { display: flex; flex-direction: column; gap: 18px; }
+.review-block h4 { font-size: 12.5px; font-weight: 600; color: var(--muted); margin-bottom: 4px; letter-spacing: .04em; }
+.review-block p, .review-block li { font-size: 15px; line-height: 1.75; color: var(--ink); }
+.review-lead p { font: 17px/1.7 var(--font-text); }
+.review-block ol { padding-left: 1.3em; display: flex; flex-direction: column; gap: 4px; }
+.review-block li::marker { color: var(--faint); font-variant-numeric: tabular-nums; }
+.review-note { font-size: 12.5px; color: var(--faint); }
+.review-error { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+.review-skeleton { padding: 4px 0; }

@@ -1,0 +1,91 @@
+/* 设计变量：纸色、墨色、朱砂强调；深色主题由 data-theme 或系统偏好切换 */
+:root {
+  --paper: #f8f5ef;
+  --paper-2: #f1ece2;
+  --card: #fffdf8;
+  --ink: #1f1c17;
+  --ink-2: #48423a;
+  --muted: #7a7266;
+  --faint: #a1998b;
+  --line: #e6dfd2;
+  --line-2: #d4cbbb;
+  --accent: #b23a26;
+  --accent-ink: #9c3220;
+  --accent-soft: rgba(178, 58, 38, .08);
+  --accent-line: rgba(178, 58, 38, .32);
+  --mark: rgba(222, 168, 46, .32);
+  --danger: #b3261e;
+  --danger-soft: rgba(179, 38, 30, .07);
+  --ok: #2f7a4f;
+  --scrim: rgba(28, 24, 18, .32);
+  --shadow: 0 1px 2px rgba(60, 45, 20, .05), 0 6px 24px rgba(60, 45, 20, .07);
+  --shadow-lg: 0 -2px 8px rgba(60, 45, 20, .05), 0 -12px 40px rgba(60, 45, 20, .12);
+
+  --font-text: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia,
+    "Songti SC", "Noto Serif CJK SC", "Source Han Serif SC", serif;
+  --font-ui: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB",
+    "Microsoft YaHei", "Segoe UI", "Noto Sans CJK SC", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  /* 阅读偏好，由设置写入 */
+  --font-size: 18px;
+  --line-height: 1.8;
+
+  --radius: 8px;
+  --radius-lg: 14px;
+  --topbar-h: 56px;
+  --measure: 38em;
+  --margin-w: 17.5rem;
+
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --paper: #161412;
+  --paper-2: #1d1a17;
+  --card: #211e1a;
+  --ink: #ebe5da;
+  --ink-2: #c7bfb2;
+  --muted: #968e81;
+  --faint: #6e675c;
+  --line: #2f2b26;
+  --line-2: #3f3a33;
+  --accent: #e2836c;
+  --accent-ink: #eb9a86;
+  --accent-soft: rgba(226, 131, 108, .1);
+  --accent-line: rgba(226, 131, 108, .4);
+  --mark: rgba(226, 170, 60, .28);
+  --danger: #f08a80;
+  --danger-soft: rgba(240, 138, 128, .1);
+  --ok: #78c595;
+  --scrim: rgba(0, 0, 0, .5);
+  --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 28px rgba(0, 0, 0, .35);
+  --shadow-lg: 0 -12px 40px rgba(0, 0, 0, .45);
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="system"] {
+    --paper: #161412;
+    --paper-2: #1d1a17;
+    --card: #211e1a;
+    --ink: #ebe5da;
+    --ink-2: #c7bfb2;
+    --muted: #968e81;
+    --faint: #6e675c;
+    --line: #2f2b26;
+    --line-2: #3f3a33;
+    --accent: #e2836c;
+    --accent-ink: #eb9a86;
+    --accent-soft: rgba(226, 131, 108, .1);
+    --accent-line: rgba(226, 131, 108, .4);
+    --mark: rgba(226, 170, 60, .28);
+    --danger: #f08a80;
+    --danger-soft: rgba(240, 138, 128, .1);
+    --ok: #78c595;
+    --scrim: rgba(0, 0, 0, .5);
+    --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 28px rgba(0, 0, 0, .35);
+    --shadow-lg: 0 -12px 40px rgba(0, 0, 0, .45);
+    color-scheme: dark;
+  }
+}

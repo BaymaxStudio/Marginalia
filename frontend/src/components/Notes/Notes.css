@@ -1,0 +1,44 @@
+/* 页边批注：宽屏时放在段落右侧，窄屏时放进底部面板 */
+.note {
+  position: relative;
+  padding: 2px 0 2px 14px;
+  border-left: 2px solid var(--line-2);
+  font-size: 13.5px; line-height: 1.65; color: var(--ink-2);
+  animation: note-in .18s ease-out;
+}
+.note + .note { margin-top: 18px; }
+.note.is-accent { border-left-color: var(--accent); }
+@keyframes note-in { from { opacity: 0; transform: translateX(-4px); } to { opacity: 1; transform: none; } }
+
+.note-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; padding-right: 28px; margin-bottom: 6px; }
+.note-title { font: 600 17px/1.3 var(--font-text); color: var(--ink); }
+.note-kicker { font-size: 12px; font-weight: 500; letter-spacing: .04em; color: var(--muted); }
+.note-sub { font-size: 12.5px; color: var(--faint); }
+.note-close { position: absolute; top: -4px; right: -6px; width: 28px; height: 28px; }
+.note-close .icon { width: 15px; height: 15px; }
+.note-foot { margin-top: 10px; display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* 查词 */
+.senses { list-style: none; display: flex; flex-direction: column; gap: 2px; margin-bottom: 8px; }
+.senses li { display: flex; gap: 8px; padding: 2px 8px; margin-left: -8px; border-radius: 6px; }
+.senses li.picked { background: var(--accent-soft); color: var(--ink); }
+.sense-pos { flex: none; min-width: 2.2em; font: italic 12.5px/1.8 var(--font-text); color: var(--muted); }
+.gloss-ai { padding-top: 8px; border-top: 1px dashed var(--line-2); }
+.gloss-ai p { color: var(--ink); }
+.tag {
+  display: inline-flex; align-items: center; height: 22px; padding: 0 8px;
+  border-radius: 999px; font-size: 11.5px; color: var(--muted);
+  border: 1px solid var(--line-2);
+}
+.tag.is-accent { color: var(--accent-ink); border-color: var(--accent-line); }
+
+/* 评论 */
+.comments { display: flex; flex-direction: column; gap: 14px; }
+.comment { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 10px; }
+.persona-mark {
+  display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%;
+  background: var(--paper-2); border: 1px solid var(--line-2);
+  font: 600 12.5px/1 var(--font-text); color: var(--ink-2);
+}
+.comment-who { font-size: 12.5px; font-weight: 600; color: var(--ink); margin-bottom: 2px; }
+.comment-text { white-space: pre-wrap; color: var(--ink-2); }

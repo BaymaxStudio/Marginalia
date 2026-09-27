@@ -14,7 +14,7 @@ from fastapi import APIRouter, HTTPException
 from app.logger import get_logger
 from app.models import LookupRequest, LookupResponse, DictionaryEntry, AIContext, AIExpand
 from app.services.dictionary import query as dict_query, lemmatize
-from app.services.ai_adapter import create_adapter
+from app.services.ai_adapter import NoAPIKeyError, create_adapter
 from app.services.ai_adapter.base import WordLookupRequest as AIWordLookupRequest
 from app.services.cache import get_cached, set_cache
 from app.services.settings_service import get_ai_config
@@ -147,11 +147,17 @@ async def ai_lookup(body: LookupRequest):
         )
 
     except Exception as e:
-        # AI 调用失败时仍返回词典数据
+        # AI 调用失败时仍返回词典数据，并把原因交给前端显示
+        if isinstance(e, NoAPIKeyError):
+            ai_error = str(e)
+        else:
+            logger.warning("word_lookup failed word=%s error=%r", lemma, e)
+            ai_error = "AI 解释暂时不可用，请稍后重试。"
         return LookupResponse(
             word_lemma=lemma, phonetic=phonetic,
             dictionary_entries=[DictionaryEntry(**d) for d in dict_entries],
             ai_context=None,
+            ai_error=ai_error,
             from_cache=False,
         )
 

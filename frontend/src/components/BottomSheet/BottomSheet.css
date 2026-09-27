@@ -1,0 +1,18 @@
+.sheet {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+  max-width: 720px; margin: 0 auto;
+  max-height: min(58vh, 520px);
+  display: flex; flex-direction: column;
+  background: var(--card);
+  border: 1px solid var(--line); border-bottom: 0;
+  border-radius: 18px 18px 0 0;
+  box-shadow: var(--shadow-lg);
+  animation: sheet-in .22s cubic-bezier(.2, .8, .2, 1);
+}
+@keyframes sheet-in { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+.sheet-handle { flex: none; width: 36px; height: 4px; margin: 10px auto 4px; border-radius: 2px; background: var(--line-2); }
+.sheet-body {
+  overflow-y: auto; overscroll-behavior: contain;
+  padding: 10px 22px calc(22px + env(safe-area-inset-bottom));
+}
+.sheet-body .note { font-size: 14.5px; }
